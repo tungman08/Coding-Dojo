@@ -21,19 +21,21 @@ namespace TicTacToe
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Play:");
             Console.ResetColor();
-            Console.WriteLine("+---+---+---+");
-            Console.WriteLine("|   |   |   |");
-            Console.WriteLine("+---+---+---+");
-            Console.WriteLine("|   |   |   |");
-            Console.WriteLine("+---+---+---+");
-            Console.WriteLine("|   |   |   |");
-            Console.WriteLine("+---+---+---+");
+            Console.WriteLine(" +---+---+---+");
+            Console.WriteLine(" |   |   |   |");
+            Console.WriteLine(" +---+---+---+");
+            Console.WriteLine(" |   |   |   |");
+            Console.WriteLine(" +---+---+---+");
+            Console.WriteLine(" |   |   |   |");
+            Console.WriteLine(" +---+---+---+");
             Console.WriteLine();
         }
 
-        internal static void Draw()
+        public static void Draw()
         {
-            Console.WriteLine($"*** Draw ***");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"***  Draw  ***");
+            Console.ResetColor();
         }
 
         public static void Winner(string name)
@@ -41,6 +43,18 @@ namespace TicTacToe
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"*** {name} Win ***");
             Console.ResetColor();
+        }
+
+        public static void Summary(int win, int lose, int draw)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Summary Score:");
+            Console.ResetColor();
+            Console.WriteLine("Play: {0,8}", win + lose + draw);
+            Console.WriteLine("Win:  {0,8}", win);
+            Console.WriteLine("Lose: {0,8}", lose);
+            Console.WriteLine("Draw: {0,8}", draw);
+            Console.WriteLine();
         }
     }
 }

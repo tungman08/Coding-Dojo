@@ -8,34 +8,49 @@ namespace TicTacToe
     {
         public static int Play(string symbol, bool first)
         {
+            int win = 0;
+            int lose = 0;
+            int draw = 0;
+
             bool again;
             do
             {
                 var game = new BoardGame(symbol);
-                var player = first;
+                var playerStart = first;
 
                 // game loop
                 while (game.GetState() == BoardGame.State.Playing)
                 {
                     // ai เป็นฝ่ายเล่นก่อน
-                    if (!player)
+                    if (!playerStart)
                     {
                         game.AiTurn();
-                        player = true;
+                        playerStart = true;
                     }
 
-                    game.HumanTurn();
+                    game.PlayerTurn();
                     game.AiTurn();
                 }
 
                 if (game.GetState() == BoardGame.State.Win)
                 {
+                    // นับแต้ม
+                    if (game.GetWinnerName() == "You")
+                    {
+                        win++;
+                    }
+                    else
+                    {
+                        lose++;
+                    }
+
                     // แสดงผู้ชนะ
                     Display.Winner($"{game.GetWinnerName()} ({game.GetWinner()})");
                 }
                 else
                 {
                     // เสมอ
+                    draw++;
                     Display.Draw();
                 }
 
@@ -43,6 +58,8 @@ namespace TicTacToe
                 Console.WriteLine();
                 again = Input.Confirm("Play again?:");
             } while (again);
+
+            Display.Summary(win, lose, draw);
 
             return 0;
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 
@@ -9,16 +8,16 @@ namespace TicTacToe
     class BoardGame : IBoardGame
     {
         private readonly List<int> _board;
-        private readonly string _human;
+        private readonly string _player;
         private readonly string _ai;
         private readonly int _row;
 
         public BoardGame(string symbol)
         {
             _board = new List<int>() { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            _human = symbol;
+            _player = symbol;
             _ai = symbol == "X" ? "O" : "X";
-            _row = Console.CursorTop;
+            _row = Console.CursorTop; // cursor เริ่มต้นของตาราง
 
             Display.Table();
             Render();
@@ -41,7 +40,7 @@ namespace TicTacToe
 
             if (winState.Contains("111"))
             {
-                return _human;
+                return _player;
             }
             else if (winState.Contains("-1-1-1"))
             {
@@ -60,7 +59,7 @@ namespace TicTacToe
 
         public string GetWinnerName()
         {
-            return GetWinner() == _human ? "You" : "Com";
+            return GetWinner() == _player ? "You" : "Com";
         }
 
         public State GetState()
@@ -77,7 +76,7 @@ namespace TicTacToe
             return State.Playing;
         }
 
-        public void HumanTurn()
+        public void PlayerTurn()
         {
             ConsoleKey key;
             Console.CursorVisible = false;
@@ -120,6 +119,7 @@ namespace TicTacToe
             if (GetState() == State.Playing)
             {
                 Console.CursorVisible = false;
+                System.Threading.Thread.Sleep(300);
 
                 if (GetEmptySlot(_board).Count == 9)
                 {
@@ -129,26 +129,27 @@ namespace TicTacToe
                 }
                 else {
                     // เลือกช่องที่มี score มากที่สุด
-                    var slot = MiniMax(_board, GetEmptySlot(_board).Count, -1)[0];
+                    var slot = MiniMax(_board, GetEmptySlot(_board).Count, -1).Slot;
                     _board[slot] = -1;
                 }
 
-                // ai ใส่ค่าในช่องที่เลือก
-                System.Threading.Thread.Sleep(500);
-                Console.CursorVisible = true;
                 Render();
+                System.Threading.Thread.Sleep(100);
+                Console.CursorVisible = true;
             }
         }
 
-        protected List<int> MiniMax(List<int> board, int depth, int player)
+        protected MiniMaxScore MiniMax(List<int> board, int depth, int player)
         {
             // คำนวณค่าช่องที่มีโอกาสชนะมากที่สุด
-            var best = player == -1 ? new List<int> { -1, -1000 } : new List<int> { -1, 1000 };
+            var best = player == -1 ? 
+                new MiniMaxScore { Slot = -1, Score = -1000 } : 
+                new MiniMaxScore { Slot = -1, Score = 1000 };
 
             if (depth == 0 || GetState() != State.Playing)
             {
                     var score = Evaluate();
-                    return new List<int> { -1, score };
+                    return new MiniMaxScore { Slot = -1, Score = score };
             }
 
             foreach (var slot in GetEmptySlot(board))
@@ -156,18 +157,18 @@ namespace TicTacToe
                 board[slot] = player;
                 var score = MiniMax(board, depth - 1, -player); // recursive function
                 board[slot] = 0;
-                score[0] = slot;
+                score.Slot = slot;
 
                 if (player == -1)
                 {
                     // max value
-                    if (score[1] > best[1])
+                    if (score.Score > best.Score)
                         best = score;
                 }
                 else
                 {
                     // min value
-                    if (score[1] < best[1])
+                    if (score.Score < best.Score)
                         best = score;
                 }
             }
@@ -180,7 +181,7 @@ namespace TicTacToe
             // เสมอ
             var score = 0;
 
-            if (GetWinner() == _human)
+            if (GetWinner() == _player)
             {
                 // ผู้เล่นชนะ
                 score = -1;
@@ -222,9 +223,8 @@ namespace TicTacToe
         protected void MoveRight()
         {
             var point = 1;
-            var found = false;
 
-            while (!found && CurrentSlot + point < _board.Count)
+            while (CurrentSlot + point < _board.Count)
             {
                 if (TakeSlot(CurrentSlot + point))
                 {
@@ -232,8 +232,7 @@ namespace TicTacToe
                     CurrentSlot += point;
                     DrawSymbol();
 
-                    // เงื่อนไขการออกจากลูป
-                    found = true;
+                    break;
                 }
 
                 point++;
@@ -243,9 +242,8 @@ namespace TicTacToe
         protected void MoveLeft()
         {
             var point = 1;
-            var found = false;
 
-            while (!found && CurrentSlot - point >= 0)
+            while (CurrentSlot - point >= 0)
             {
                 if (TakeSlot(CurrentSlot - point))
                 {
@@ -253,8 +251,7 @@ namespace TicTacToe
                     CurrentSlot -= point;
                     DrawSymbol();
 
-                    // เงื่อนไขการออกจากลูป
-                    found = true;
+                    break;
                 }
 
                 point++;
@@ -266,9 +263,8 @@ namespace TicTacToe
             var step = new List<int> { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
             var current = step.IndexOf(CurrentSlot);
             var point = 1;
-            var found = false;
 
-            while (!found && current - point >= 0)
+            while (current - point >= 0)
             {
                 if (TakeSlot(step[current - point]))
                 {
@@ -276,8 +272,7 @@ namespace TicTacToe
                     CurrentSlot = step[current - point];
                     DrawSymbol();
 
-                    // เงื่อนไขการออกจากลูป
-                    found = true;
+                    break;
                 }
 
                 point++;
@@ -289,9 +284,8 @@ namespace TicTacToe
             var step = new List<int> { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
             var current = step.IndexOf(CurrentSlot);
             var point = 1;
-            var found = false;
 
-            while (!found && current + point < _board.Count)
+            while (current + point < _board.Count)
             {
                 if (TakeSlot(step[current + point]))
                 {
@@ -299,35 +293,27 @@ namespace TicTacToe
                     CurrentSlot = step[current + point];
                     DrawSymbol();
 
-                    // เงื่อนไขการออกจากลูป
-                    found = true;
+                    break;
                 }
 
                 point++;
             }
         }
-        protected Point ToPoint(int slot)
-        {
-            var row = slot / 3;
-            var col = slot % 3;
-
-            return new Point(_row + (row * 2) + 2, (col * 4) + 1);
-        }
 
         protected void DrawSymbol()
         {
-            var point = ToPoint(CurrentSlot);
+            var point = CurrentSlot.ToPoint(_row);
 
             Console.SetCursorPosition(point.Y, point.X);
             Console.ForegroundColor = ConsoleColor.Black;
             Console.BackgroundColor = ConsoleColor.Yellow;
-            Console.Write($" { _human } ");
+            Console.Write($" { _player } ");
             Console.ResetColor();
         }
 
         protected void ClearSymbol()
         {
-            var point = ToPoint(CurrentSlot);
+            var point = CurrentSlot.ToPoint(_row);
 
             Console.SetCursorPosition(point.Y, point.X);
             Console.Write("   ");
@@ -337,11 +323,11 @@ namespace TicTacToe
         {
             for (var i = 0; i < _board.Count; i++)
             {
-                var point = ToPoint(i);
+                var point = i.ToPoint(_row);
 
                 if (_board[i] != 0)
                 {
-                    var symbol = _board[i] == 1 ? $" {_human } " : $" {_ai } ";
+                    var symbol = _board[i] == 1 ? $" {_player } " : $" {_ai } ";
                     Console.SetCursorPosition(point.Y, point.X);
 
                     if (symbol.Trim() == "X")
@@ -359,6 +345,13 @@ namespace TicTacToe
             }
 
             Console.SetCursorPosition(0, _row + 9);
+        }
+
+        protected class MiniMaxScore
+        {
+            public int Slot { get; set; }
+
+            public int Score { get; set; }
         }
 
         public enum State 
