@@ -109,6 +109,8 @@ namespace TicTacToe
         {
             if (GetState() == State.Playing)
             {
+                Console.CursorVisible = false;
+
                 if (GetEmptySlot(_board).Count == 9)
                 {
                     var random = new Random();
@@ -119,7 +121,8 @@ namespace TicTacToe
                     _board[slot[0]] = -1;
                 }
 
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(100);
+                Console.CursorVisible = true;
                 Render();
             }
         }

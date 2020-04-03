@@ -8,29 +8,36 @@ namespace TicTacToe
     {
         public static int Play(string symbol, bool first)
         {
-            var game = new BoardGame(symbol);
-            var play = first;
-
-            while (game.GetState() == BoardGame.State.Playing)
+            bool again;
+            do
             {
-                if (!play)
+                var game = new BoardGame(symbol);
+                var play = first;
+
+                while (game.GetState() == BoardGame.State.Playing)
                 {
+                    if (!play)
+                    {
+                        game.AiTurn();
+                        play = true;
+                    }
+
+                    game.HumanTurn();
                     game.AiTurn();
-                    play = true;
                 }
 
-                game.HumanTurn();
-                game.AiTurn();
-            }
+                if (game.GetState() == BoardGame.State.Win)
+                {
+                    Display.Winner($"{game.GetWinnerName()} ({game.GetWinner()})");
+                }
+                else
+                {
+                    Display.Draw();
+                }
 
-            if (game.GetState() == BoardGame.State.Win) 
-            {
-                Display.Winner($"{game.GetWinnerName()} ({game.GetWinner()})");
-            }
-            else
-            {
-                Display.Draw();
-            }
+                Console.WriteLine();
+                again = Input.Confirm("Play again?:");
+            } while (again);
 
             return 0;
         }
