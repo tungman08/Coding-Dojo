@@ -9,7 +9,7 @@ namespace TicTacToe
         static void Main(string[] args)
         {
             var cmd = new CommandLineApplication(throwOnUnexpectedArg: false);
-            var oHuman = cmd.Option("-c | --choose", "Choose X or O", CommandOptionType.SingleValue);
+            var oSymbol = cmd.Option("-c | --choose", "Choose X or O", CommandOptionType.SingleValue);
             var oFirst = cmd.Option("-f | --first", "You play first turn", CommandOptionType.NoValue);
             cmd.HelpOption("-h | --help");
 
@@ -18,14 +18,14 @@ namespace TicTacToe
                 Display.Logo();
                 cmd.ShowHelp();
 
-                var human = (!oHuman.HasValue()) ?
-                    Input.Select("Choose X or O:", new Dictionary<bool, string> { { true, "X" }, { false, "O" } }) :
-                    oHuman.Value().ToLower() == "x";
+                var symbol = (!oSymbol.HasValue()) ?
+                    Input.Select("Choose X or O:", new Dictionary<string, string> { { "X", "X" }, { "O", "O" } }) :
+                    "X";
                 var first = (!oFirst.HasValue()) ?
                     Input.Confirm("First to start?:") :
                     true;
 
-                return Game.Play(human, first);
+                return Game.Play(symbol, first);
             });
 
             try

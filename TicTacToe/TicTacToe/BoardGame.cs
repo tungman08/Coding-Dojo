@@ -6,86 +6,69 @@ using System.Text;
 
 namespace TicTacToe
 {
-    class BoardGame : IBoardGame
+    class BoardGame
     {
-
         private readonly List<int> _board;
-        private readonly bool _isX;
+        private readonly string _human;
+        private readonly string _ai;
         private readonly int _top;
 
-        public BoardGame(bool isX, int top)
+        public BoardGame(string symbol)
         {
             _board = new List<int>() { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            _isX = isX;
-            _top = top;
+            _human = symbol;
+            _ai = symbol == "X" ? "O" : "X";
+            _top = Console.CursorTop;
 
             Display.Table();
             Render();
         }
 
-        protected Point CurrentCell { get; set; }
+        protected int CurrentSlot { get; set; }
 
         public string GetWinner()
         {
-            var winState = new List<int>[] 
+            var winState = new List<string>
             {
-                new List<int> { _board[0], _board[1], _board[2] },
-                new List<int> { _board[3], _board[4], _board[5] },
-                new List<int> { _board[6], _board[7], _board[8] },
-                new List<int> { _board[0], _board[3], _board[6] },
-                new List<int> { _board[1], _board[4], _board[7] },
-                new List<int> { _board[2], _board[5], _board[8] },
-                new List<int> { _board[0], _board[4], _board[8] },
-                new List<int> { _board[2], _board[4], _board[6] },
+                $"{_board[0]}{_board[1]}{_board[2]}",
+                $"{_board[3]}{_board[4]}{_board[5]}",
+                $"{_board[6]}{_board[7]}{_board[8]}",
+                $"{_board[0]}{_board[3]}{_board[6]}",
+                $"{_board[1]}{_board[4]}{_board[7]}",
+                $"{_board[2]}{_board[5]}{_board[8]}",
+                $"{_board[0]}{_board[4]}{_board[8]}",
+                $"{_board[2]}{_board[4]}{_board[6]}",
             };
 
-            foreach(var win in winState)
+            if (winState.Contains("111"))
             {
-                if (win[0] != 0 && win[0] == win[1] && win[1] == win[2])
-                {
-                    if (_isX)
-                    {
-                        return win[0] == 1 ? "X" : "O";
-                    }
-                    else
-                    {
-                        return win[0] == 1 ? "O" : "X";
-                    }
-                }
+                return _human;
+            }
+            else if (winState.Contains("-1-1-1"))
+            {
+                return _ai;
             }
 
             return string.Empty;
         }
 
-        public bool TakeSlot(bool isX, int row, int column)
+        public string GetWinnerName()
         {
-            var index = (row * 3) + column;
-
-            return (index < _board.Count && index >= 0) ? _board[index] == 0 : false;
+            return GetWinner() == _human ? "You" : "Com";
         }
 
-        public string GetWinnerWithName()
+        public State GetState()
         {
-            string name;
-            if (_isX)
+            if (GetWinner() != string.Empty)
             {
-                name = (GetWinner() == "X") ? "You" : "Com";
+                return State.Win;
             }
-            else
+            else if (GetEmptySlot(_board).Count() == 0)
             {
-                name = (GetWinner() == "X") ? "Com" : "You";
+                return State.Draw;
             }
 
-            return name;
-        }
-
-        public void AiTurn()
-        {
-            var point = InitialCell();
-            _board[(point.X * 3) + point.Y] = -1;
-
-            System.Threading.Thread.Sleep(200);
-            Render();
+            return State.Playing;
         }
 
         public void HumanTurn()
@@ -93,8 +76,8 @@ namespace TicTacToe
             ConsoleKey key;
             Console.CursorVisible = false;
 
-            CurrentCell = InitialCell();
-            DrawCell();
+            CurrentSlot = GetEmptySlot(_board).First();
+            DrawSymbol();
 
             do
             {
@@ -118,43 +101,111 @@ namespace TicTacToe
             } while (key != ConsoleKey.Enter);
 
             Console.CursorVisible = true;
-            _board[(CurrentCell.X * 3) + CurrentCell.Y] = 1;
+            _board[CurrentSlot] = 1;
             Render();
         }
 
-        public int EmptyCell()
+        public void AiTurn()
         {
-            return _board.Where(c => c == 0).Count();
+            if (GetState() == State.Playing)
+            {
+                if (GetEmptySlot(_board).Count == 9)
+                {
+                    var random = new Random();
+                    _board[random.Next(0, 8)] = -1;
+                }
+                else {
+                    var slot = MiniMax(_board, GetEmptySlot(_board).Count, -1);
+                    _board[slot[0]] = -1;
+                }
+
+                System.Threading.Thread.Sleep(200);
+                Render();
+            }
         }
 
-        protected Point InitialCell()
+        protected List<int> MiniMax(List<int> board, int depth, int player)
         {
-            for (var i = 0; i < _board.Count; i++)
-            {
-                if (_board[i] == 0)
-                {
-                    var row = i / 3;
-                    var col = i % 3;
+            var best = player == -1 ? new List<int> { -1, -1000 } : new List<int> { -1, 1000 };
 
-                    return new Point(row, col);
+            if (depth == 0 || GetState() != State.Playing)
+            {
+                    var score = Evalute();
+                    return new List<int> { -1, score };
+            }
+
+            foreach (var slot in GetEmptySlot(board))
+            {
+                board[slot] = player;
+                var score = MiniMax(board, depth - 1, -player);
+                board[slot] = 0;
+                score[0] = slot;
+
+                if (player == -1)
+                {
+                    if (score[1] > best[1])
+                        best = score;
+                }
+                else
+                {
+                    if (score[1] < best[1])
+                        best = score;
                 }
             }
 
-            return new Point(0, 0);
+            return best;
+        }
+
+        protected int Evalute()
+        {
+            var score = 0;
+
+            if (GetWinner() == _human)
+            {
+                score = -1;
+            }
+            else if (GetWinner() == _ai)
+            {
+                score = 1;
+            }
+
+            return score;
+        }
+
+        protected bool TakeSlot(int slot)
+        {
+            return GetEmptySlot(_board).Contains(slot);
+        }
+
+        protected List<int> GetEmptySlot(List<int> board)
+        {
+            var empty = new List<int>();
+
+            for (var i = 0; i < board.Count; i++)
+            {
+                if (_board[i] == 0)
+                {
+                    empty.Add(i);
+                }    
+            }
+
+            return empty;
         }
 
         protected void MoveRight()
         {
             var point = 1;
-            while (CurrentCell.Y + point < 3)
-            {
-                if (TakeSlot(_isX, CurrentCell.X, CurrentCell.Y + point))
-                {
-                    ClearCell();
-                    CurrentCell = new Point(CurrentCell.X, CurrentCell.Y + point);
-                    DrawCell();
+            var found = false;
 
-                    break;
+            while (!found && CurrentSlot + point < _board.Count)
+            {
+                if (TakeSlot(CurrentSlot + point))
+                {
+                    ClearSymbol();
+                    CurrentSlot += point;
+                    DrawSymbol();
+
+                    found = true;
                 }
 
                 point++;
@@ -164,15 +215,17 @@ namespace TicTacToe
         protected void MoveLeft()
         {
             var point = 1;
-            while (CurrentCell.Y - point >= 0)
-            {
-                if (TakeSlot(_isX, CurrentCell.X, CurrentCell.Y - point))
-                {
-                    ClearCell();
-                    CurrentCell = new Point(CurrentCell.X, CurrentCell.Y - point);
-                    DrawCell();
+            var found = false;
 
-                    break;
+            while (!found && CurrentSlot - point >= 0)
+            {
+                if (TakeSlot(CurrentSlot - point))
+                {
+                    ClearSymbol();
+                    CurrentSlot -= point;
+                    DrawSymbol();
+
+                    found = true;
                 }
 
                 point++;
@@ -181,16 +234,20 @@ namespace TicTacToe
 
         protected void MoveUp()
         {
+            var step = new List<int> { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
+            var current = step.IndexOf(CurrentSlot);
             var point = 1;
-            while (CurrentCell.X - point >= 0)
-            {
-                if (TakeSlot(_isX, CurrentCell.X - point, CurrentCell.Y))
-                {
-                    ClearCell();
-                    CurrentCell = new Point(CurrentCell.X - point, CurrentCell.Y);
-                    DrawCell();
+            var found = false;
 
-                    break;
+            while (!found && current - point >= 0)
+            {
+                if (TakeSlot(step[current - point]))
+                {
+                    ClearSymbol();
+                    CurrentSlot = step[current - point];
+                    DrawSymbol();
+
+                    found = true;
                 }
 
                 point++;
@@ -199,33 +256,48 @@ namespace TicTacToe
 
         protected void MoveDown()
         {
+            var step = new List<int> { 0, 3, 6, 1, 4, 7, 2, 5, 8 };
+            var current = step.IndexOf(CurrentSlot);
             var point = 1;
-            while (CurrentCell.X + point < 3)
-            {
-                if (TakeSlot(_isX, CurrentCell.X + point, CurrentCell.Y))
-                {
-                    ClearCell();
-                    CurrentCell = new Point(CurrentCell.X + point, CurrentCell.Y);
-                    DrawCell();
+            var found = false;
 
-                    break;
+            while (!found && current + point < _board.Count)
+            {
+                if (TakeSlot(step[current + point]))
+                {
+                    ClearSymbol();
+                    CurrentSlot = step[current + point];
+                    DrawSymbol();
+
+                    found = true;
                 }
 
                 point++;
             }
         }
-
-        protected void DrawCell()
+        protected Point ToPoint(int slot)
         {
-            Console.SetCursorPosition((CurrentCell.Y * 4) + 2, _top + (CurrentCell.X * 2) + 2);
+            var row = slot / 3;
+            var col = slot % 3;
+
+            return new Point(_top + (row * 2) + 2, (col * 4) + 2);
+        }
+
+        protected void DrawSymbol()
+        {
+            var point = ToPoint(CurrentSlot);
+
+            Console.SetCursorPosition(point.Y, point.X);
             Console.BackgroundColor = ConsoleColor.Magenta;
-            Console.Write(_isX ? "X" : "O");
+            Console.Write(_human);
             Console.ResetColor();
         }
 
-        protected void ClearCell()
+        protected void ClearSymbol()
         {
-            Console.SetCursorPosition((CurrentCell.Y * 4) + 2, _top + (CurrentCell.X * 2) + 2);
+            var point = ToPoint(CurrentSlot);
+
+            Console.SetCursorPosition(point.Y, point.X);
             Console.Write(" ");
         }
 
@@ -233,25 +305,23 @@ namespace TicTacToe
         {
             for (var i = 0; i < _board.Count; i++)
             {
-                var row = i / 3;
-                var col = i % 3;
+                var point = ToPoint(i);
 
                 if (_board[i] != 0)
                 {
-                    Console.SetCursorPosition((col * 4) + 2, _top + (row * 2) + 2);
-
-                    if (_isX)
-                    {
-                        Console.Write(_board[i] == 1 ? "X" : "O");
-                    }
-                    else
-                    {
-                        Console.Write(_board[i] == 1 ? "O" : "X");
-                    }
+                    Console.SetCursorPosition(point.Y, point.X);
+                    Console.Write(_board[i] == 1 ? _human : _ai);
                 }
             }
 
             Console.SetCursorPosition(0, _top + 9);
+        }
+
+        public enum State 
+        { 
+            Playing,
+            Win,
+            Draw
         }
     }
 }

@@ -6,25 +6,31 @@ namespace TicTacToe
 {
     class Game
     {
-        public static int Play(bool isX, bool first)
+        public static int Play(string symbol, bool first)
         {
-            var top = Console.CursorTop;
-            var game = new BoardGame(isX, top);
-            var humanFirst = first;
+            var game = new BoardGame(symbol);
+            var play = first;
 
-            while (game.EmptyCell() > 0 && game.GetWinner() == string.Empty)
+            while (game.GetState() == BoardGame.State.Playing)
             {
-                if (!humanFirst)
+                if (!play)
                 {
                     game.AiTurn();
-                    humanFirst = true;
+                    play = true;
                 }
 
                 game.HumanTurn();
                 game.AiTurn();
             }
 
-            Display.Winner(game.GetWinnerWithName());
+            if (game.GetState() == BoardGame.State.Win) 
+            {
+                Display.Winner($"{game.GetWinnerName()} ({game.GetWinner()})");
+            }
+            else
+            {
+                Display.Draw();
+            }
 
             return 0;
         }

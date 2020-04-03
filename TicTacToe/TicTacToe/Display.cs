@@ -31,6 +31,11 @@ namespace TicTacToe
             Console.WriteLine();
         }
 
+        internal static void Draw()
+        {
+            Console.WriteLine($"*** Draw ***");
+        }
+
         public static void Winner(string name)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
