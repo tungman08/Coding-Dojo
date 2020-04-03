@@ -23,11 +23,10 @@ namespace TicTacToe
             Display.Table();
             Render();
         }
-
-        protected int CurrentSlot { get; set; }
-
+        
         public string GetWinner()
         {
+            // เงือนไขการชนะ
             var winState = new List<string>
             {
                 $"{_board[0]}{_board[1]}{_board[2]}",
@@ -49,6 +48,7 @@ namespace TicTacToe
                 return _ai;
             }
 
+            // ยังไม่รู้ผลให้ส่งค่าว่าง
             return string.Empty;
         }
 
@@ -76,11 +76,13 @@ namespace TicTacToe
             ConsoleKey key;
             Console.CursorVisible = false;
 
+            // หาช่องที่ว่างแรกที่เจอเพื่อวาง cursor
             CurrentSlot = GetEmptySlot(_board).First();
             DrawSymbol();
 
             do
             {
+                // กดปุ่มลูกศรเพื่อเลื่อน cursor ไปยังช่องที่ว่างอยู่
                 key = Console.ReadKey(true).Key;
 
                 switch (key)
@@ -100,6 +102,7 @@ namespace TicTacToe
                 }
             } while (key != ConsoleKey.Enter);
 
+            // ผู้เล่นใส่ค่าในช่องที่เลือก
             Console.CursorVisible = true;
             _board[CurrentSlot] = 1;
             Render();
@@ -107,21 +110,25 @@ namespace TicTacToe
 
         public void AiTurn()
         {
+            // ตรวจสอบว่าจบเกมแล้วหรือยัง
             if (GetState() == State.Playing)
             {
                 Console.CursorVisible = false;
 
                 if (GetEmptySlot(_board).Count == 9)
                 {
+                    // ai เริ่มเล่นก่อน
                     var random = new Random();
                     _board[random.Next(0, 8)] = -1;
                 }
                 else {
-                    var slot = MiniMax(_board, GetEmptySlot(_board).Count, -1);
-                    _board[slot[0]] = -1;
+                    // เลือกช่องที่มี score มากที่สุด
+                    var slot = MiniMax(_board, GetEmptySlot(_board).Count, -1)[0];
+                    _board[slot] = -1;
                 }
 
-                System.Threading.Thread.Sleep(100);
+                // ai ใส่ค่าในช่องที่เลือก
+                System.Threading.Thread.Sleep(500);
                 Console.CursorVisible = true;
                 Render();
             }
@@ -129,28 +136,31 @@ namespace TicTacToe
 
         protected List<int> MiniMax(List<int> board, int depth, int player)
         {
+            // คำนวณค่าช่องที่มีโอกาสชนะมากที่สุด
             var best = player == -1 ? new List<int> { -1, -1000 } : new List<int> { -1, 1000 };
 
             if (depth == 0 || GetState() != State.Playing)
             {
-                    var score = Evalute();
+                    var score = Evaluate();
                     return new List<int> { -1, score };
             }
 
             foreach (var slot in GetEmptySlot(board))
             {
                 board[slot] = player;
-                var score = MiniMax(board, depth - 1, -player);
+                var score = MiniMax(board, depth - 1, -player); // recursive function
                 board[slot] = 0;
                 score[0] = slot;
 
                 if (player == -1)
                 {
+                    // max value
                     if (score[1] > best[1])
                         best = score;
                 }
                 else
                 {
+                    // min value
                     if (score[1] < best[1])
                         best = score;
                 }
@@ -159,16 +169,19 @@ namespace TicTacToe
             return best;
         }
 
-        protected int Evalute()
+        protected int Evaluate()
         {
+            // เสมอ
             var score = 0;
 
             if (GetWinner() == _human)
             {
+                // ผู้เล่นชนะ
                 score = -1;
             }
             else if (GetWinner() == _ai)
             {
+                // ai ชนะ
                 score = 1;
             }
 
@@ -177,11 +190,13 @@ namespace TicTacToe
 
         protected bool TakeSlot(int slot)
         {
+            // ตรวจสอบว่าช่องนี้ว่างหรือไม่
             return GetEmptySlot(_board).Contains(slot);
         }
 
         protected List<int> GetEmptySlot(List<int> board)
         {
+            // ส่ง index ของช่องที่ว่างทั้งหมด
             var empty = new List<int>();
 
             for (var i = 0; i < board.Count; i++)
@@ -194,6 +209,9 @@ namespace TicTacToe
 
             return empty;
         }
+
+        // cursor สำหรับเลือกช่องลง
+        protected int CurrentSlot { get; set; }
 
         protected void MoveRight()
         {
@@ -208,6 +226,7 @@ namespace TicTacToe
                     CurrentSlot += point;
                     DrawSymbol();
 
+                    // เงื่อนไขการออกจากลูป
                     found = true;
                 }
 
@@ -228,6 +247,7 @@ namespace TicTacToe
                     CurrentSlot -= point;
                     DrawSymbol();
 
+                    // เงื่อนไขการออกจากลูป
                     found = true;
                 }
 
@@ -250,6 +270,7 @@ namespace TicTacToe
                     CurrentSlot = step[current - point];
                     DrawSymbol();
 
+                    // เงื่อนไขการออกจากลูป
                     found = true;
                 }
 
@@ -272,6 +293,7 @@ namespace TicTacToe
                     CurrentSlot = step[current + point];
                     DrawSymbol();
 
+                    // เงื่อนไขการออกจากลูป
                     found = true;
                 }
 
@@ -283,7 +305,7 @@ namespace TicTacToe
             var row = slot / 3;
             var col = slot % 3;
 
-            return new Point(_row + (row * 2) + 2, (col * 4) + 2);
+            return new Point(_row + (row * 2) + 2, (col * 4) + 1);
         }
 
         protected void DrawSymbol()
@@ -291,8 +313,9 @@ namespace TicTacToe
             var point = ToPoint(CurrentSlot);
 
             Console.SetCursorPosition(point.Y, point.X);
-            Console.BackgroundColor = ConsoleColor.Magenta;
-            Console.Write(_human);
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.Yellow;
+            Console.Write($" { _human } ");
             Console.ResetColor();
         }
 
@@ -301,7 +324,7 @@ namespace TicTacToe
             var point = ToPoint(CurrentSlot);
 
             Console.SetCursorPosition(point.Y, point.X);
-            Console.Write(" ");
+            Console.Write("   ");
         }
 
         protected void Render()
@@ -312,8 +335,20 @@ namespace TicTacToe
 
                 if (_board[i] != 0)
                 {
+                    var symbol = _board[i] == 1 ? $" {_human } " : $" {_ai } ";
                     Console.SetCursorPosition(point.Y, point.X);
-                    Console.Write(_board[i] == 1 ? _human : _ai);
+
+                    if (symbol.Trim() == "X")
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                    }
+
+                    Console.Write(symbol);
+                    Console.ResetColor();
                 }
             }
 

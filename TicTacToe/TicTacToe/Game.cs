@@ -12,14 +12,16 @@ namespace TicTacToe
             do
             {
                 var game = new BoardGame(symbol);
-                var play = first;
+                var player = first;
 
+                // game loop
                 while (game.GetState() == BoardGame.State.Playing)
                 {
-                    if (!play)
+                    // ai เป็นฝ่ายเล่นก่อน
+                    if (!player)
                     {
                         game.AiTurn();
-                        play = true;
+                        player = true;
                     }
 
                     game.HumanTurn();
@@ -28,13 +30,16 @@ namespace TicTacToe
 
                 if (game.GetState() == BoardGame.State.Win)
                 {
+                    // แสดงผู้ชนะ
                     Display.Winner($"{game.GetWinnerName()} ({game.GetWinner()})");
                 }
                 else
                 {
+                    // เสมอ
                     Display.Draw();
                 }
 
+                // เล่นใหม่อีกครั้ง
                 Console.WriteLine();
                 again = Input.Confirm("Play again?:");
             } while (again);
