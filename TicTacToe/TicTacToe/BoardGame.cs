@@ -6,7 +6,7 @@ using System.Text;
 
 namespace TicTacToe
 {
-    class BoardGame
+    class BoardGame : IBoardGame
     {
         private readonly List<int> _board;
         private readonly string _human;
@@ -50,6 +50,12 @@ namespace TicTacToe
 
             // ยังไม่รู้ผลให้ส่งค่าว่าง
             return string.Empty;
+        }
+
+        public bool TakeSlot(bool isX, int row, int col)
+        {
+            // ไม่ได้ใช้
+            throw new NotImplementedException();
         }
 
         public string GetWinnerName()

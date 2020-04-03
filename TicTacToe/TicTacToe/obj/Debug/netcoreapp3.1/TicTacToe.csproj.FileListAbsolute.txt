@@ -12,3 +12,4 @@ D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.genruntimecon
 D:\Documents\TicTacToe\TicTacToe\bin\Debug\netcoreapp3.1\Microsoft.Extensions.CommandLineUtils.dll
 D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.csproj.CoreCompileInputs.cache
 D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.csproj.CopyComplete
+D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.csprojAssemblyReference.cache
