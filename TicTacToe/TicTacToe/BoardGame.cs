@@ -11,14 +11,14 @@ namespace TicTacToe
         private readonly List<int> _board;
         private readonly string _human;
         private readonly string _ai;
-        private readonly int _top;
+        private readonly int _row;
 
         public BoardGame(string symbol)
         {
             _board = new List<int>() { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             _human = symbol;
             _ai = symbol == "X" ? "O" : "X";
-            _top = Console.CursorTop;
+            _row = Console.CursorTop;
 
             Display.Table();
             Render();
@@ -283,7 +283,7 @@ namespace TicTacToe
             var row = slot / 3;
             var col = slot % 3;
 
-            return new Point(_top + (row * 2) + 2, (col * 4) + 2);
+            return new Point(_row + (row * 2) + 2, (col * 4) + 2);
         }
 
         protected void DrawSymbol()
@@ -317,7 +317,7 @@ namespace TicTacToe
                 }
             }
 
-            Console.SetCursorPosition(0, _top + 9);
+            Console.SetCursorPosition(0, _row + 9);
         }
 
         public enum State 

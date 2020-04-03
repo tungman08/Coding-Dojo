@@ -20,7 +20,7 @@ namespace TicTacToe
 
                 var symbol = (!oSymbol.HasValue()) ?
                     Input.Select("Choose X or O:", new Dictionary<string, string> { { "X", "X" }, { "O", "O" } }) :
-                    "X";
+                    oSymbol.Value().ToUpper() == "X" ? "X" : "O";
                 var first = (!oFirst.HasValue()) ?
                     Input.Confirm("First to start?:") :
                     true;

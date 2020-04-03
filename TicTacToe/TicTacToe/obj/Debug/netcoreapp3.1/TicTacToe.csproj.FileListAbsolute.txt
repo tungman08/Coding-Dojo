@@ -4,7 +4,6 @@ D:\Documents\TicTacToe\TicTacToe\bin\Debug\netcoreapp3.1\TicTacToe.runtimeconfig
 D:\Documents\TicTacToe\TicTacToe\bin\Debug\netcoreapp3.1\TicTacToe.runtimeconfig.dev.json
 D:\Documents\TicTacToe\TicTacToe\bin\Debug\netcoreapp3.1\TicTacToe.dll
 D:\Documents\TicTacToe\TicTacToe\bin\Debug\netcoreapp3.1\TicTacToe.pdb
-D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.csprojAssemblyReference.cache
 D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.AssemblyInfoInputs.cache
 D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.AssemblyInfo.cs
 D:\Documents\TicTacToe\TicTacToe\obj\Debug\netcoreapp3.1\TicTacToe.dll
