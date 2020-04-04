@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.CommandLineUtils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using TicTacToe.ConsoleUtil;
 
 namespace TicTacToe
 {
@@ -10,35 +10,23 @@ namespace TicTacToe
         static void Main(string[] args)
         {
             var cmd = new CommandLineApplication(throwOnUnexpectedArg: false);
-            var oSymbol = cmd.Option("-c | --choose", "Choose X or O", CommandOptionType.SingleValue);
+            var oSymbol = cmd.Option("-p | --player", "Choose X or O or Random", CommandOptionType.SingleValue);
             var oFirst = cmd.Option("-f | --first", "You play first turn", CommandOptionType.NoValue);
             cmd.HelpOption("-h | --help");
 
             cmd.OnExecute(() =>
             {
-                Display.Logo();
+                Logo();
                 cmd.ShowHelp();
 
-                var options = new Dictionary<string, string>
-                { 
-                    { "X", "[X]" }, 
-                    { "O", "[O]" } 
-                };
+                // เลือกสัญลักษณ์ที่ใช้เล่น
+                var symbol = OptionSymbol(oSymbol);
 
-                // เลือกข้าง
-                var symbol = oSymbol.HasValue() ?
-                    "XO".Contains(oSymbol.Value().ToUpper()) ? // ตรวจสอบ value ต้องเป็น x หรือ o เท่านั้น
-                    oSymbol.Value().ToUpper() == "X" ? "X" : "O" :
-                    Input.Select("Choose X or O:", options) :
-                    Input.Select("Choose X or O:", options);
+                // เลือกเล่นก่อนหรือไม่
+                var first = OptionPlayFirst(oFirst);
 
-                // เลือกเล่นก่อน
-                var first = !oFirst.HasValue() ?
-                    Input.Confirm("First to start?:") :
-                    true;
-
-                // เริ่มเกม
-                return Game.Play(symbol, first);
+                // เริ่มเล่นเกม
+                return new PlayGame().Play(symbol, first);
             });
 
             try
@@ -49,6 +37,47 @@ namespace TicTacToe
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        static string OptionSymbol(CommandOption option)
+        {
+            var options = new Dictionary<string, string>
+                {
+                    { "X", "[X]" },
+                    { "O", "[O]" },
+                    { "R", "[Random]" }
+                };
+
+            if (option.HasValue())
+            {
+                switch (option.Value().ToUpper())
+                {
+                    case "X":
+                        return "X";
+                    case "O":
+                        return "O";
+                    case "R":
+                    case "RANDAM":
+                        return "R";
+                }
+            }
+
+            return Input.Select("Choose symbol to play:", options);
+        }
+
+        static bool OptionPlayFirst(CommandOption option)
+        {
+            return !option.HasValue() ? Input.Confirm("First to start?") : true;
+        }
+
+        static void Logo()
+        {
+            Console.WriteLine();
+            Console.WriteLine("\t    " + @"    |\__/,|   (`\");
+            Console.WriteLine("\t    " + @"  _.|o o  |_   ) )");
+            Console.WriteLine("\t    " + @"-(((---(((--------");
+            Console.WriteLine();
+            Console.WriteLine("============= Tic Tac Toe =============");
         }
     }
 }
