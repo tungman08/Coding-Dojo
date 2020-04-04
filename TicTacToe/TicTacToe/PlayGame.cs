@@ -9,7 +9,7 @@ namespace TicTacToe
 {
     class PlayGame
     {
-        public int Play(string selectedOption, bool humanFirst)
+        public int Start(string selectedOption, bool humanFirst)
         {
             var score = new GameScore();
 

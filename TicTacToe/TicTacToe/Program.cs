@@ -26,7 +26,7 @@ namespace TicTacToe
                 var first = OptionPlayFirst(oFirst);
 
                 // เริ่มเล่นเกม
-                return new PlayGame().Play(symbol, first);
+                return new PlayGame().Start(symbol, first);
             });
 
             try
