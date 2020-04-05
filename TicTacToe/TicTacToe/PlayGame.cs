@@ -15,38 +15,45 @@ namespace TicTacToe
 
             do
             {
-                var symbol = GetSymbol(selected);
+                var symbol = GetSymbolForPlayer(selected);
+                var turn = first ? symbol.Item1 : symbol.Item2;
+
                 var game = new OxGame();
                 var board = new Board();
                 var human = new Human(symbol.Item1);
                 var ai = new AI(symbol.Item2, level);
-                var humanFirst = first;
 
                 // game loop
                 while (game.GameState == State.Playing)
                 {
-                    board.Render(game.GameData);
-
-                    // ai เป็นฝ่ายเล่นก่อน
-                    if (!humanFirst)
+                    if (turn == human.Symbol)
                     {
-                        humanFirst = true;
-                        AiTurn(game, board, ai);
+                        game.CheckError(HumanTurn(game, board, human));
+                        turn = ChangeTurn(turn);
                     }
-
-                    HumanTurn(game, board, human);
-                    AiTurn(game, board, ai);
+                    else
+                    {
+                        game.CheckError(AiTurn(game, board, ai));
+                        turn = ChangeTurn(turn);
+                    }
                 }
 
-                if (game.GameState != State.Playing)
+                if (game.GameState == State.Win || game.GameState == State.Draw)
                 {
                     // นับสถิติการแข่งขัน
                     AddSore(game, score, human, ai);
                 }
+                else if (game.GameState == State.Error)
+                {
+                    // แสดงข้อผิดพลาด
+                    DisplayError();
+                }
 
             } while (PlayAgain());
 
-            return score.Summary();
+            score.Summary();
+
+            return 0;
         }
 
         protected bool HumanTurn(OxGame game, Board board, Human player)
@@ -85,6 +92,11 @@ namespace TicTacToe
             return Input.Confirm("Play again?");
         }
 
+        protected string ChangeTurn(string turn)
+        {
+            return turn == "X" ? "O" : "X";
+        }
+
         protected void AddSore(OxGame game, GameScore score, Human human, AI ai)
         {
             switch (game.GameState)
@@ -108,7 +120,7 @@ namespace TicTacToe
             }
         }
 
-        protected Tuple<string, string> GetSymbol(string symbol)
+        protected Tuple<string, string> GetSymbolForPlayer(string symbol)
         {
             var symbols = new List<string> { "X", "O" };
 
@@ -128,6 +140,13 @@ namespace TicTacToe
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"*** {message} ***");
+            Console.ResetColor();
+        }
+
+        protected void DisplayError()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"*** Error ***");
             Console.ResetColor();
         }
     }

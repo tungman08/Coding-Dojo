@@ -36,7 +36,7 @@ namespace TicTacToe
             Draw += 1;
         }
 
-        public int Summary()
+        public void Summary()
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Summary Score:");
@@ -46,8 +46,6 @@ namespace TicTacToe
             Console.WriteLine("Lose: {0,8}", Lose);
             Console.WriteLine("Draw: {0,8}", Draw);
             Console.WriteLine();
-
-            return 0;
         }
     }
 }

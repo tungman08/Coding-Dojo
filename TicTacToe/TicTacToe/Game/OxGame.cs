@@ -7,6 +7,7 @@ namespace TicTacToe.Game
     class OxGame : IBoardGame
     {
         private readonly List<string> _gameData;
+        private bool _error;
 
         public OxGame()
         {
@@ -16,14 +17,14 @@ namespace TicTacToe.Game
                 string.Empty, string.Empty, string.Empty,
                 string.Empty, string.Empty, string.Empty
             };
+            _error = false;
 
             ThisTurn = string.Empty;
         }
 
         public string[,] GameData => GetGameData();
 
-        public State GameState => GetEmptySlot().Count > 0 ? GetWinner() != string.Empty ?
-            State.Win : State.Playing : State.Draw;
+        public State GameState => GetGameState();
 
         public string ThisTurn { get; private set; }
 
@@ -82,6 +83,32 @@ namespace TicTacToe.Game
             }
 
             return false;
+        }
+
+        public void CheckError(bool isSuccess)
+        {
+            if (!isSuccess)
+            {
+                _error = true;
+            }
+        }
+
+        protected State GetGameState()
+        {
+            if (_error)
+            {
+                return State.Error;
+            }
+            else if (GetWinner() != string.Empty)
+            {
+                return State.Win;
+            }
+            else if (GetEmptySlot().Count == 0)
+            {
+                return State.Draw;
+            }
+
+            return State.Playing;
         }
 
         protected List<int> GetEmptySlot()

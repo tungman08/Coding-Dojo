@@ -24,6 +24,7 @@ namespace TicTacToe.Game
     {
         Win,
         Draw,
-        Playing
+        Playing,
+        Error
     }
 }
