@@ -9,7 +9,7 @@ namespace TicTacToe
 {
     class PlayGame
     {
-        public int Start(string selectedOption, bool humanFirst)
+        public int Start(string selected, int level, bool humanFirst)
         {
             var score = new GameScore();
 
@@ -17,9 +17,9 @@ namespace TicTacToe
             {
                 var game = new OxGame();
                 var board = new Board();
-                var symbol = GetSymbol(selectedOption);
+                var symbol = GetSymbol(selected);
                 var human = new Human(symbol.Item1);
-                var ai = new AI(symbol.Item2);
+                var ai = new AI(symbol.Item2, level);
 
                 // game loop
                 while (game.GameState == State.Playing)

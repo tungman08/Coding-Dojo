@@ -51,6 +51,7 @@ namespace TicTacToe.Game
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.Write($" { symbol } ");
             Console.ResetColor();
+            Console.SetCursorPosition(0, _position + 9);
         }
 
         public void ClearSymbol(int index)
@@ -61,6 +62,7 @@ namespace TicTacToe.Game
 
             Console.SetCursorPosition(left, top);
             Console.Write("   ");
+            Console.SetCursorPosition(0, _position + 9);
         }
 
         protected Tuple<int, int> IndexToPoint(int index)
@@ -94,6 +96,7 @@ namespace TicTacToe.Game
             Console.WriteLine(" |   |   |   |");
             Console.WriteLine(" +---+---+---+");
             Console.WriteLine();
+            Console.SetCursorPosition(0, _position + 9);
         }
     }
 }
