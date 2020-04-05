@@ -54,7 +54,7 @@ namespace TicTacToe
                     case "O":
                         return "O";
                     case "R":
-                    case "RANDAM":
+                    case "RANDOM":
                         return "R";
                 }
             }
@@ -78,14 +78,14 @@ namespace TicTacToe
                 }
             }
 
-            var options = new Dictionary<string, string>
+            var options = new Dictionary<int, string>
                 {
-                    { "1", "Level 1 Easy" },
-                    { "2", "Level 2 Normal" },
-                    { "3", "Level 3 Hard" },
+                    { 1, "Level 1 Easy" },
+                    { 2, "Level 2 Normal" },
+                    { 3, "Level 3 Hard" },
                 };
 
-            return int.Parse(Input.Select("Choose level 1-3:", options));
+            return Input.Select("Choose level 1-3:", options);
         }
 
         static bool OptionPlayFirst(CommandOption option)
