@@ -28,12 +28,14 @@ namespace TicTacToe
                 {
                     if (turn == human.Symbol)
                     {
-                        game.CheckError(HumanTurn(game, board, human));
+                        // ตาผู้เล่น
+                        game.CheckError(Place(game, board, human));
                         turn = ChangeTurn(turn);
                     }
                     else
                     {
-                        game.CheckError(AiTurn(game, board, ai));
+                        //ตา ai
+                        game.CheckError(Place(game, board, ai));
                         turn = ChangeTurn(turn);
                     }
                 }
@@ -56,22 +58,7 @@ namespace TicTacToe
             return 0;
         }
 
-        protected bool HumanTurn(OxGame game, Board board, Human player)
-        {
-            var result = false;
-
-            // ตรวจสอบว่าจบเกมแล้วหรือยัง
-            if (game.GameState == State.Playing)
-            {
-                var slot = player.Play(board, game);
-                result = game.TakeSlot(slot.IsX, slot.Row, slot.Column);
-                board.Render(game.GameData);
-            }
-
-            return result;
-        }
-
-        protected bool AiTurn(OxGame game, Board board, AI player)
+        protected bool Place(OxGame game, Board board, IPlayer player)
         {
             var result = false;
 
