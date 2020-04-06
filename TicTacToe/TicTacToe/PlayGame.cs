@@ -34,7 +34,7 @@ namespace TicTacToe
                     }
                     else
                     {
-                        //ตา ai
+                        // ตา ai
                         game.CheckError(Place(game, board, ai));
                         turn = ChangeTurn(turn);
                     }

@@ -52,7 +52,7 @@ namespace TicTacToe.Game
                 return "O";
             }
 
-            // ยังไม่จบเกมส่ง empty string (ขอไม่ตามโจทย์)
+            // ยังไม่จบเกมส่ง empty string
             return string.Empty;
         }
 
