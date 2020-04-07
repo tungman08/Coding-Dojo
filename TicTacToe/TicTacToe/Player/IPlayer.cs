@@ -7,6 +7,6 @@ namespace TicTacToe.Player
 {
     interface IPlayer
     {
-        Slot Play(Board board, OxGame game);
+        Slot Play(OxGame game, Board board);
     }
 }

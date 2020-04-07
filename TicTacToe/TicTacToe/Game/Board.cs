@@ -8,69 +8,64 @@ namespace TicTacToe.Game
     {
         private readonly int _position;
 
-        public Board()
+        public Board() : this(BoardSize.Small)
         {
-            // cursor เริ่มต้นของตาราง
-            _position = Console.CursorTop;
+        }
+
+        public Board(BoardSize size)
+        {
+            _position = Console.CursorTop; // cursor เริ่มต้นของตาราง
+            Size = size;
 
             CreateTable();
         }
 
-        public void Render(string[,] gameData)
+        public BoardSize Size { get; private set; }
+
+        public void Render(List<Slot> slots)
         {
-            for (var row = 0; row < gameData.GetLength(0); row++) // 0 = height
+            foreach (var slot in slots)
             {
-                for (var col = 0; col < gameData.GetLength(1); col++) // 1 = width
+                if (slot.Value != string.Empty)
                 {
-                    var symbol = gameData[row, col].Trim();
+                    var top = RowToTop(slot.Row);
+                    var left = ColumnToLeft(slot.Column);
 
-                    if (symbol != string.Empty)
-                    {
-                        var top = RowToTop(row);
-                        var left = ColToLeft(col);
-
-                        Console.SetCursorPosition(left, top);
-                        Console.ForegroundColor = (symbol == "X") ? ConsoleColor.Red : ConsoleColor.Blue;
-                        Console.Write($" {symbol} ");
-                        Console.ResetColor();
-                    }
+                    Console.SetCursorPosition(left, top);
+                    Console.ForegroundColor = (slot.Value == "X") ? ConsoleColor.Red : ConsoleColor.Blue;
+                    Console.Write($" {slot.Value} ");
+                    Console.ResetColor();
                 }
             }
 
-            Console.SetCursorPosition(0, _position + 9);
+            Console.SetCursorPosition(0, MoveToEnd());
         }
 
-        public void PutSymbol(string symbol, int index)
+        public void Cursor(Slot slot)
         {
-            var point = IndexToPoint(index);
-            var top = RowToTop(point.Item1);
-            var left = ColToLeft(point.Item2);
+            if (slot.IsX != null)
+            {
+                var symbol = slot.Value;
+                var top = RowToTop(slot.Row);
+                var left = ColumnToLeft(slot.Column);
 
-            Console.SetCursorPosition(left, top);
-            Console.ForegroundColor = ConsoleColor.Black;
-            Console.BackgroundColor = ConsoleColor.Yellow;
-            Console.Write($" { symbol } ");
-            Console.ResetColor();
-            Console.SetCursorPosition(0, _position + 9);
+                Console.SetCursorPosition(left, top);
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.Write($" { symbol } ");
+                Console.ResetColor();
+                Console.SetCursorPosition(0, MoveToEnd());
+            }
         }
 
-        public void ClearSymbol(int index)
+        public void Clear(Slot slot)
         {
-            var point = IndexToPoint(index);
-            var top = RowToTop(point.Item1);
-            var left = ColToLeft(point.Item2);
+            var top = RowToTop(slot.Row);
+            var left = ColumnToLeft(slot.Column);
 
             Console.SetCursorPosition(left, top);
             Console.Write("   ");
-            Console.SetCursorPosition(0, _position + 9);
-        }
-
-        protected Tuple<int, int> IndexToPoint(int index)
-        {
-            var row = index / 3;
-            var col = index % 3;
-
-            return Tuple.Create(row, col);
+            Console.SetCursorPosition(0, MoveToEnd());
         }
 
         protected int RowToTop(int row)
@@ -78,25 +73,47 @@ namespace TicTacToe.Game
             return _position + (row * 2) + 2;
         }
 
-        protected int ColToLeft(int col)
+        protected int ColumnToLeft(int col)
         {
             return (col * 4) + 2;
         }
 
+        protected int MoveToEnd()
+        {
+            var end = (Size != BoardSize.Small) ? (Size != BoardSize.Medium) ? 17 : 13 : 9;
+
+            return _position + end;
+        }
+
         protected void CreateTable()
         {
+            var table = new string[] { " +", " |", "---+", "   |" };
+
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Play:");
             Console.ResetColor();
-            Console.WriteLine(" +---+---+---+");
-            Console.WriteLine(" |   |   |   |");
-            Console.WriteLine(" +---+---+---+");
-            Console.WriteLine(" |   |   |   |");
-            Console.WriteLine(" +---+---+---+");
-            Console.WriteLine(" |   |   |   |");
-            Console.WriteLine(" +---+---+---+");
+
+            for (var row = 0; row <= (int)Size * 2; row++)
+            {
+                var line = string.Empty;
+
+                for (var col = 0; col <= (int)Size; col++)
+                {
+                    if (row % 2 == 0)
+                    {
+                        line += (col == 0) ? table[0] : table[2];
+                    }
+                    else
+                    {
+                        line += (col == 0) ? table[1] : table[3];
+                    }
+                }
+
+                Console.WriteLine(line);
+            }
+
             Console.WriteLine();
-            Console.SetCursorPosition(0, _position + 9);
+            Console.SetCursorPosition(0, MoveToEnd());
         }
     }
 }

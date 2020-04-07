@@ -8,149 +8,92 @@ namespace TicTacToe.Player
 {
     class AI : BasePlayer, IPlayer
     {
-        public AI(string symbol) : this(symbol, 2)
+        public AI(string symbol) : this(symbol, AiLevel.Normal)
         {
         }
 
-        public AI(string symbol, int level) : base(symbol)
+        public AI(string symbol, AiLevel level) : base(symbol)
         {
             Level = level;
         }
 
-        public int Level { get; private set; }
+        public AiLevel Level { get; private set; }
 
-        public Slot Play(Board board, OxGame game)
+        public Slot Play(OxGame game, Board board)
         {
-            var data = ConvertGameData(game.GameData);
+            var cells = (int)board.Size * (int)board.Size;
 
-            if (GetEmptySlot(data).Count == 9)
+            if (game.Slots.Where(s => s.IsX == null).Count() == cells)
             {
                 // ai เริ่มเล่นก่อน
-                return CreateSlot(new Random().Next(0, 9));
+                var random = new Random();
+                return new Slot { IsX = Symbol == "X",
+                    Row = random.Next(0, (int)board.Size), Column = random.Next(0, (int)board.Size) };
             }
 
             // difficult level
-            var index = Level switch
+            var slot = Level switch
             {
-                1 => EasyMode(data),
-                2 => NormalMode(data),
-                _ => HardMode(GetEmptySlot(data).Count, data, Symbol).Index,
+                AiLevel.Easy => EasyMode(board.Size, game.Slots),
+                AiLevel.Normal => NormalMode(board.Size, game.Slots),
+                _ => HardMode(board.Size, game.Slots, Symbol),
             };
 
-            return CreateSlot(index);
+            return slot;
         }
 
-        protected int EasyMode(List<string> gameData)
+        protected Slot EasyMode(BoardSize size, List<Slot> slots)
         {
-            var data = GetEmptySlot(gameData);
-            int index;
-            do
+            var random = new Random();
+            int row = random.Next(0, (int)size);
+            int col = random.Next(0, (int)size);
+
+            while (slots.Single(s => s.Row == row && s.Column == col).IsX != null)
             {
-                index = new Random().Next(0, 9);
+                row = random.Next(0, (int)size);
+                col = random.Next(0, (int)size);
+            } 
 
-            } while (!data.Contains(index));
-
-            return index;
+            return new Slot { IsX = Symbol == "X", Row = row, Column = col };
         }
 
-        protected int NormalMode(List<string> gameData)
+        protected Slot NormalMode(BoardSize size, List<Slot> slots)
         {
-            var data = GetEmptySlot(gameData);
+            var stupid = ((int)size * (int)size) - ((int)size / 3);
 
-            return (data.Count >= 8) ?
-                EasyMode(gameData) :
-                HardMode(data.Count, gameData, Symbol).Index;
+            return (slots.Where(s => s.IsX == null).Count() >= stupid) ?
+                EasyMode(size, slots) :
+                HardMode(size, slots, Symbol);
         }
 
         // minimax algorithm
-        protected MinimaxScore HardMode(int depth, List<string> gameData, string player)
+        protected Slot HardMode(BoardSize size, List<Slot> slots, string player)
         {
-            // คำนวณค่าช่องที่มีโอกาสชนะมากที่สุด
-            var best = (player == Symbol) ?
-                new MinimaxScore { Index = -1, Score = -100 } : // ai
-                new MinimaxScore { Index = -1, Score = 100 }; // playper
+            // กำลังปรับปรุง
 
-            if (IsGameOver(depth, gameData))
+            var random = new Random();
+            int row = random.Next(0, (int)size);
+            int col = random.Next(0, (int)size);
+
+            while (slots.Single(s => s.Row == row && s.Column == col).IsX != null)
             {
-                return new MinimaxScore { Index = -1, Score = Evaluate(gameData) };
+                row = random.Next(0, (int)size);
+                col = random.Next(0, (int)size);
             }
 
-            foreach (var index in GetEmptySlot(gameData))
-            {
-                gameData[index] = player;
-                var score = HardMode(depth - 1, gameData, TogglePlayer(player)); // recursive function
-                gameData[index] = string.Empty;
-                score.Index = index;
-
-                if (player == Symbol)
-                {
-                    // max value
-                    if (score.Score > best.Score)
-                        best = score;
-                }
-                else
-                {
-                    // min value
-                    if (score.Score < best.Score)
-                        best = score;
-                }
-            }
-
-            return best;
-        }
-
-        protected int Evaluate(List<string> gameData)
-        {
-            // เสมอ
-            var score = 0;
-
-            // ai ชนะ
-            if (GetWinner(gameData, Symbol))
-            {
-                score = 10;
-            }
-            // ผู้เล่นชนะ
-            else if (GetWinner(gameData, TogglePlayer(Symbol)))
-            {
-                score = -10;
-            }
-
-            return score;
-        }
-
-        protected bool GetWinner(List<string> gameData, string player)
-        {
-            var winState = WinState(gameData);
-
-            return winState.Contains($"{player}{player}{player}");
-        }
-
-        protected bool IsGameOver(int depth, List<string> gameData)
-        {
-            var winState = WinState(gameData);
-
-            return depth == 0 || winState.Contains("XXX") || winState.Contains("OOO");
-        }
-
-        protected List<string> WinState(List<string> gameData)
-        {
-            // เงือนไขการชนะ
-            return new List<string>
-            {
-                $"{gameData[0]}{gameData[1]}{gameData[2]}",
-                $"{gameData[3]}{gameData[4]}{gameData[5]}",
-                $"{gameData[6]}{gameData[7]}{gameData[8]}",
-                $"{gameData[0]}{gameData[3]}{gameData[6]}",
-                $"{gameData[1]}{gameData[4]}{gameData[7]}",
-                $"{gameData[2]}{gameData[5]}{gameData[8]}",
-                $"{gameData[0]}{gameData[4]}{gameData[8]}",
-                $"{gameData[2]}{gameData[4]}{gameData[6]}",
-            };
+            return new Slot { IsX = Symbol == "X", Row = row, Column = col };
         }
 
         protected string TogglePlayer(string player)
         {
             return player == "X" ? "O" : "X";
         }
+    }
+
+    enum AiLevel
+    {
+        Easy,
+        Normal,
+        Hard
     }
 }

@@ -9,7 +9,7 @@ namespace TicTacToe
 {
     class PlayGame
     {
-        public int Start(string selected, int level, bool first)
+        public int Start(string selected, BoardSize size, AiLevel level, bool first)
         {
             var score = new GameScore();
 
@@ -18,8 +18,8 @@ namespace TicTacToe
                 var symbol = GetSymbolForPlayer(selected);
                 var turn = first ? symbol.Item1 : symbol.Item2;
 
-                var game = new OxGame();
-                var board = new Board();
+                var game = new OxGame(size);
+                var board = new Board(size);
                 var human = new Human(symbol.Item1);
                 var ai = new AI(symbol.Item2, level);
 
@@ -29,13 +29,13 @@ namespace TicTacToe
                     if (turn == human.Symbol)
                     {
                         // ตาผู้เล่น
-                        game.CheckError(Place(game, board, human));
+                        game.CheckError(PlayerTurn(game, board, human));
                         turn = ChangeTurn(turn);
                     }
                     else
                     {
                         // ตา ai
-                        game.CheckError(Place(game, board, ai));
+                        game.CheckError(PlayerTurn(game, board, ai));
                         turn = ChangeTurn(turn);
                     }
                 }
@@ -58,17 +58,11 @@ namespace TicTacToe
             return 0;
         }
 
-        protected bool Place(OxGame game, Board board, IPlayer player)
+        protected bool PlayerTurn(OxGame game, Board board, IPlayer player)
         {
-            var result = false;
-
-            // ตรวจสอบว่าจบเกมแล้วหรือยัง
-            if (game.GameState == State.Playing)
-            {
-                var slot = player.Play(board, game);
-                result = game.TakeSlot(slot.IsX, slot.Row, slot.Column);
-                board.Render(game.GameData);
-            }
+            var slot = player.Play(game, board);
+            var result = game.TakeSlot(slot);
+            board.Render(game.Slots);
 
             return result;
         }
