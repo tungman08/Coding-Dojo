@@ -109,12 +109,12 @@ namespace TicTacToe
             {
                 var random = new Random();
                 var index = random.Next(0, 2);
-                return Tuple.Create(symbols.Single(a => a == symbols[index]),
-                    symbols.Single(a => a != symbols[index]));
+                return Tuple.Create(symbols.Find(a => a == symbols[index]),
+                    symbols.Find(a => a != symbols[index]));
             }
 
-            return Tuple.Create(symbols.Single(a => a == symbol),
-                symbols.Single(a => a != symbol));
+            return Tuple.Create(symbols.Find(a => a == symbol),
+                symbols.Find(a => a != symbol));
         }
 
         protected void DisplayResult(string message)
