@@ -50,7 +50,7 @@ namespace TicTacToe.Game
                 var left = ColumnToLeft(slot.Column);
 
                 Console.SetCursorPosition(left, top);
-                Console.ForegroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = (slot.Value == "X") ? ConsoleColor.Red : ConsoleColor.Blue;
                 Console.BackgroundColor = ConsoleColor.Yellow;
                 Console.Write($" { symbol } ");
                 Console.ResetColor();

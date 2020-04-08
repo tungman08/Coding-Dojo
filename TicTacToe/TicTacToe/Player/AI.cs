@@ -34,50 +34,88 @@ namespace TicTacToe.Player
             // difficult level
             var slot = Level switch
             {
-                AiLevel.Easy => EasyMode(board.Size, game.Slots),
-                AiLevel.Normal => NormalMode(board.Size, game.Slots),
-                _ => HardMode(board.Size, game.Slots, Symbol),
+                AiLevel.Easy => EasyMode(game),
+                AiLevel.Normal => NormalMode(game),
+                _ => HardMode(game, Symbol),
             };
 
             return slot;
         }
 
-        protected Slot EasyMode(BoardSize size, List<Slot> slots)
+        protected Slot EasyMode(OxGame game)
         {
             var random = new Random();
-            int row = random.Next(0, (int)size);
-            int col = random.Next(0, (int)size);
+            int row = random.Next(0, (int)game.Size);
+            int col = random.Next(0, (int)game.Size);
 
-            while (slots.Single(s => s.Row == row && s.Column == col).IsX != null)
+            while (game.Slots.Find(s => s.Row == row && s.Column == col).IsX != null)
             {
-                row = random.Next(0, (int)size);
-                col = random.Next(0, (int)size);
+                row = random.Next(0, (int)game.Size);
+                col = random.Next(0, (int)game.Size);
             } 
 
             return new Slot { IsX = Symbol == "X", Row = row, Column = col };
         }
 
-        protected Slot NormalMode(BoardSize size, List<Slot> slots)
+        protected Slot NormalMode(OxGame game)
         {
-            var easy = ((int)size * (int)size) - ((int)size / 2);
+            var stupid = ((int)game.Size * (int)game.Size) - ((int)game.Size != 3 ? (int)game.Size != 5 ? 5 : 3 : 1);
 
-            return (slots.Where(s => s.IsX == null).Count() >= easy) ?
-                EasyMode(size, slots) :
-                HardMode(size, slots, Symbol);
-        }
-
-        protected Slot HardMode(BoardSize size, List<Slot> slots, string player)
-        {
-
+            return (game.Slots.Where(s => s.IsX == null).Count() >= stupid) ?
+                EasyMode(game) :
+                HardMode(game, Symbol);
         }
 
         // minimax algorithm
-        protected Slot Minimax(OxGame game, string player)
+        protected Slot HardMode(OxGame game, string player)
         {
-
+            return Minimax(game, player);
         }
 
-        protected string ChangeTurn(string player)
+        protected Slot Minimax(OxGame game, string player)
+        {
+            Slot best = null;
+            var isX = player == "X";
+
+            foreach (var slot in game.Slots.Where(s => s.IsX == null))
+            {
+                var clone = game.Clone();
+                clone.TakeSlot(isX, slot.Row, slot.Column);
+
+                if (clone.GameState == State.Playing)
+                {
+                    var minimax = Minimax(clone, TogglePlayer(player));
+                    slot.Score = minimax.Score;
+                }
+                else
+                {
+                    switch (clone.GameState)
+                    {
+                        case State.Win:
+                            slot.Score = (clone.GetWinner() == Symbol) ? 1 : -1;
+                            break;
+                        case State.Draw:
+                            slot.Score = 0;
+                            break;
+                    }
+                }
+
+                if (best == null)
+                {
+                    best = new Slot { IsX = isX, Row = slot.Row, Column = slot.Column, Score = slot.Score };
+                }
+
+                if ((player == Symbol && slot.Score > best.Score) || 
+                    (player != Symbol && slot.Score < best.Score))
+                {
+                    best = new Slot { IsX = isX, Row = slot.Row, Column = slot.Column, Score = slot.Score };
+                }
+            }
+
+            return best;
+        }
+
+        protected string TogglePlayer(string player)
         {
             return player == "X" ? "O" : "X";
         }

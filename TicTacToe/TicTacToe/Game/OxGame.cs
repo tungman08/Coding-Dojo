@@ -20,9 +20,9 @@ namespace TicTacToe.Game
             ThisTurn = string.Empty;
         }
 
-        public List<Slot> Slots { get; set; }
-
         public State GameState => GetGameState();
+
+        public List<Slot> Slots { get; private set; }
 
         public BoardSize Size { get; private set; }
 
@@ -50,7 +50,7 @@ namespace TicTacToe.Game
         public bool TakeSlot(bool isX, int row, int col)
         {
             var player = isX ? "X" : "O";
-            var slot = Slots.Single(s => s.Row == row && s.Column == col);
+            var slot = Slots.Find(s => s.Row == row && s.Column == col);
 
             // ตรวจสอบเกมยังไม่จบและช่องนี้ว่าง
             if (GameState == State.Playing && slot.IsX == null)
@@ -86,14 +86,6 @@ namespace TicTacToe.Game
             return false;
         }
 
-        public void CheckError(bool isSuccess)
-        {
-            if (!isSuccess)
-            {
-                _error = true;
-            }
-        }
-
         protected State GetGameState()
         {
             if (_error)
@@ -110,6 +102,26 @@ namespace TicTacToe.Game
             }
 
             return State.Playing;
+        }
+
+        public OxGame Clone()
+        {
+            var game = new OxGame(Size);
+
+            for (int i = 0; i < Slots.Count; i++)
+            {
+                game.Slots[i].IsX = Slots[i].IsX;
+            }
+
+            return game;
+        }
+
+        public void CheckError(bool isSuccess)
+        {
+            if (!isSuccess)
+            {
+                _error = true;
+            }
         }
 
         protected void ChangeTurn()
@@ -198,6 +210,7 @@ namespace TicTacToe.Game
         Playing,
         Error
     }
+
     enum BoardSize
     {
         Small = 3,
