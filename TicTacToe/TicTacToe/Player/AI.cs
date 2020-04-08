@@ -59,32 +59,25 @@ namespace TicTacToe.Player
 
         protected Slot NormalMode(BoardSize size, List<Slot> slots)
         {
-            var stupid = ((int)size * (int)size) - ((int)size / 3);
+            var easy = ((int)size * (int)size) - ((int)size / 2);
 
-            return (slots.Where(s => s.IsX == null).Count() >= stupid) ?
+            return (slots.Where(s => s.IsX == null).Count() >= easy) ?
                 EasyMode(size, slots) :
                 HardMode(size, slots, Symbol);
         }
 
-        // minimax algorithm
         protected Slot HardMode(BoardSize size, List<Slot> slots, string player)
         {
-            // กำลังปรับปรุง
 
-            var random = new Random();
-            int row = random.Next(0, (int)size);
-            int col = random.Next(0, (int)size);
-
-            while (slots.Single(s => s.Row == row && s.Column == col).IsX != null)
-            {
-                row = random.Next(0, (int)size);
-                col = random.Next(0, (int)size);
-            }
-
-            return new Slot { IsX = Symbol == "X", Row = row, Column = col };
         }
 
-        protected string TogglePlayer(string player)
+        // minimax algorithm
+        protected Slot Minimax(OxGame game, string player)
+        {
+
+        }
+
+        protected string ChangeTurn(string player)
         {
             return player == "X" ? "O" : "X";
         }

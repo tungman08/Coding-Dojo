@@ -16,7 +16,7 @@ namespace TicTacToe
             do
             {
                 var symbol = GetSymbolForPlayer(selected);
-                var turn = first ? symbol.Item1 : symbol.Item2;
+                var player = first ? symbol.Item1 : symbol.Item2;
 
                 var game = new OxGame(size);
                 var board = new Board(size);
@@ -26,17 +26,17 @@ namespace TicTacToe
                 // game loop
                 while (game.GameState == State.Playing)
                 {
-                    if (turn == human.Symbol)
+                    if (player == human.Symbol)
                     {
                         // ตาผู้เล่น
                         game.CheckError(PlayerTurn(game, board, human));
-                        turn = ChangeTurn(turn);
+                        player = ChangeTurn(player);
                     }
                     else
                     {
                         // ตา ai
                         game.CheckError(PlayerTurn(game, board, ai));
-                        turn = ChangeTurn(turn);
+                        player = ChangeTurn(player);
                     }
                 }
 
@@ -73,9 +73,9 @@ namespace TicTacToe
             return Input.Confirm("Play again?");
         }
 
-        protected string ChangeTurn(string turn)
+        protected string ChangeTurn(string player)
         {
-            return turn == "X" ? "O" : "X";
+            return player == "X" ? "O" : "X";
         }
 
         protected void AddSore(OxGame game, GameScore score, Human human, AI ai)

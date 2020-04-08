@@ -13,7 +13,7 @@ namespace TicTacToe
         {
             var cmd = new CommandLineApplication(throwOnUnexpectedArg: false);
             var oSymbol = cmd.Option("-p | --player", "Choose X or O or Random", CommandOptionType.SingleValue);
-            var oSize = cmd.Option("-s | --size", "Choose size S or M or L", CommandOptionType.SingleValue);
+            //var oSize = cmd.Option("-s | --size", "Choose size S or M or L", CommandOptionType.SingleValue);
             var oLevel = cmd.Option("-l | --level", "Choose level 1-3", CommandOptionType.SingleValue);
             var oFirst = cmd.Option("-f | --first", "You play first turn", CommandOptionType.NoValue);
             cmd.HelpOption("-h | --help");
@@ -27,7 +27,8 @@ namespace TicTacToe
                 var symbol = OptionSymbol(oSymbol);
 
                 // เลือกขนาดของกระดาน
-                var size = OptionSize(oSize);
+                //var size = OptionSize(oSize);
+                var size = BoardSize.Small;
 
                 // เลือกระดับความยาก
                 var level = OptionLevel(oLevel);

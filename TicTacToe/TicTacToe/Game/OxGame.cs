@@ -20,7 +20,7 @@ namespace TicTacToe.Game
             ThisTurn = string.Empty;
         }
 
-        public List<Slot> Slots { get; private set; }
+        public List<Slot> Slots { get; set; }
 
         public State GameState => GetGameState();
 
